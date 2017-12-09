@@ -20,6 +20,7 @@ func (r *JobRunner) Worker(id int) {
 		cmd := ""
 		cmd = fmt.Sprintf("%s", job.Command)
 		params := []string{"-n", job.Node, cmd}
+		log.Debugf("Worker(%d): running ssh %s", id, strings.Join(params, " "))
 		stdout, stderr, err := ssh.Run(params)
 		if err != nil {
 			log.Warningf("JobRunner.Worker(%d): failed to run ssh: %v", id, err)
@@ -115,13 +116,17 @@ func (r *JobRunner) Start(outputModifier string) {
 		default:
 			{
 				if len(response.Stdout) > 0 {
-					for _, line := range strings.Split(response.Stdout, "\n") {
+					stdout := strings.Split(response.Stdout, "\n")
+					stdout = stdout[:len(stdout)-1]
+					for _, line := range stdout {
 						fmt.Printf("%s stdout: %s\n", response.Node, line)
 					}
 				}
 
 				if len(response.Stderr) > 0 {
-					for _, line := range strings.Split(response.Stderr, "\n") {
+					stderr := strings.Split(response.Stderr, "\n")
+					stderr = stderr[:len(stderr)-1]
+					for _, line := range stderr {
 						fmt.Printf("%s stderr: %s\n", response.Node, line)
 					}
 				}

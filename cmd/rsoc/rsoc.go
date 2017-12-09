@@ -17,7 +17,7 @@ const (
 	D_DEBUG         = false
 	D_TIMESTAMP     = false
 	D_CLUSTER       = ""
-	D_NUM_WORKERS   = 5
+	D_NUM_WORKERS   = 10
 	D_SHOW_CLUSTERS = false
 	D_SHOW_NODES    = ""
 	D_SHOW_COMMANDS = false
