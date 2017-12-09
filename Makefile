@@ -6,11 +6,7 @@ BUILD_BRANCH = build
 all: prepare dependencies ${BUILD_DIR}/${TARGET}
 
 prepare:
-	git branch -l | grep -q ${BUILD_BRANCH} \
-		&& git branch -D ${BUILD_BRANCH} \
-		|| true
-	git checkout -b "${BUILD_BRANCH}"
-	mkdir -p ${BUILD_DIR}
+	mkdir -p "${BUILD_DIR}"
 
 dependencies:
 	go get -v ./...
@@ -20,5 +16,4 @@ ${BUILD_DIR}/${TARGET}:
 		cmd/${TARGET}/${TARGET}.go
 
 clean:
-	git checkout master
-	git branch -D "${BUILD_BRANCH}"
+	[[ -d "${BUILD_DIR}" ]] && rm -rf "${BUILD_DIR}" || true
