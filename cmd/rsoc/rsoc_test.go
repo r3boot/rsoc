@@ -51,8 +51,8 @@ func TestRunApplication(t *testing.T) {
 
 	*useCluster = "test"
 	statusCode = RunApplication()
-	if statusCode != 0 {
-		t.Errorf("RunApplication -c: status code != 0: %d", statusCode)
+	if statusCode != 1 {
+		t.Errorf("RunApplication -c: status code != 1: %d", statusCode)
 	}
 	*useCluster = ""
 }

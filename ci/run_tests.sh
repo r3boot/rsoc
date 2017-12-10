@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 BASE_DIR="$(dirname $(dirname $(readlink -f ${0})))"
-OUTPUT_DIR="${BASE_DIR}/test_results"
+OUTPUT_DIR="${BASE_DIR}/ci/coverage"
 
 if [[ ! -d "${OUTPUT_DIR}" ]]; then
     mkdir -p "${OUTPUT_DIR}"
