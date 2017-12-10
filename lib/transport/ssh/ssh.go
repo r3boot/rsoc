@@ -3,6 +3,7 @@ package ssh
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -12,6 +13,13 @@ func Run(args []string) (string, string, error) {
 	cmd := exec.Command("ssh", args...)
 	cmd.Stdout = &stdoutBuff
 	cmd.Stderr = &stderrBuff
+
+	if len(args) > 0 {
+		testArg := args[0]
+		if testArg == "test" {
+			cmd.Process = &os.Process{}
+		}
+	}
 
 	err := cmd.Start()
 	if err != nil {
@@ -29,5 +37,9 @@ func Run(args []string) (string, string, error) {
 		stderr = stderrBuff.String()
 	}
 
-	return stdout, stderr, nil
+	if err != nil {
+		return stdout, stderr, fmt.Errorf("Run cmd.wait: %v", err)
+	}
+
+	return stdout, stderr, err
 }

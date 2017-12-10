@@ -1,12 +1,25 @@
 package jobrunner
 
-import "github.com/r3boot/rsoc/lib/config"
+import (
+	"os"
+
+	"github.com/r3boot/rsoc/lib/config"
+)
 
 const (
 	KILL_PILL = "DIEDIEDIE"
 	MAX_JOBS  = 1024
 	MOD_GREP  = "grep"
 	MOD_JSON  = "json"
+
+	TEST_CLUSTER = "test"
+	TEST_STDOUT  = "stdout"
+	TEST_STDERR  = "stderr"
+	TEST_ERR     = "err"
+
+	TEST_STDOUT_MSG = "This is some stdout output\nwhich is split out over multiple lines\n"
+	TEST_STDERR_MSG = "This is some stderr output\nwhich is split out over multiple lines\n"
+	TEST_ERR_MSG    = "This is a test error"
 )
 
 type NodeJob struct {
@@ -31,4 +44,5 @@ type JobRunner struct {
 	numWorkers  int
 	JobQueue    chan NodeJob
 	ResultQueue chan Result
+	TestFd      *os.File
 }

@@ -58,12 +58,12 @@ func (c *MainConfig) GetAllCommands() []CommandConfig {
 }
 
 func (c *MainConfig) CreateExample() error {
-	_, err := os.Stat(cfgFile)
+	_, err := os.Stat(CfgFile)
 	if err == nil {
 		return nil
 	}
 
-	fullPath, err := filepath.Abs(cfgFile)
+	fullPath, err := filepath.Abs(CfgFile)
 	if err != nil {
 		return fmt.Errorf("MainConfig.CreateExample filepath.Abs: %v", err)
 	}
@@ -74,18 +74,18 @@ func (c *MainConfig) CreateExample() error {
 		return fmt.Errorf("MainConfig.CreateExample os.MkdirAll: %v", err)
 	}
 
-	err = ioutil.WriteFile(cfgFile, []byte(EXAMPLE_CONFIG), 0644)
+	err = ioutil.WriteFile(CfgFile, []byte(EXAMPLE_CONFIG), 0644)
 	if err != nil {
 		return fmt.Errorf("MainConfig.CreateExample ioutil.WriteFile: %v", err)
 	}
 
-	log.Debugf("MainConfig.CreateExample: example created in %s", cfgFile)
+	log.Debugf("MainConfig.CreateExample: example created in %s", CfgFile)
 
 	return nil
 }
 
 func (c *MainConfig) Load() error {
-	data, err := ioutil.ReadFile(cfgFile)
+	data, err := ioutil.ReadFile(CfgFile)
 	if err != nil {
 		return fmt.Errorf("config.Load ioutil.ReadFile: %v", err)
 	}

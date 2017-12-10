@@ -5,14 +5,14 @@ import (
 )
 
 var (
-	cfgFile string
+	CfgFile string
 	log     *logger.Logger
 )
 
 func NewConfig(l *logger.Logger, fname string) (*MainConfig, error) {
 	log = l
 	config := &MainConfig{}
-	cfgFile = fname
+	CfgFile = fname
 
 	err := config.CreateExample()
 	if err != nil {

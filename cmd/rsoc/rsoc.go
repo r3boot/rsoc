@@ -5,9 +5,8 @@ import (
 	"os"
 
 	"fmt"
-	"os/user"
-	"path/filepath"
 
+	"github.com/r3boot/rsoc/lib/cliutils"
 	"github.com/r3boot/rsoc/lib/config"
 	"github.com/r3boot/rsoc/lib/jobrunner"
 	"github.com/r3boot/rsoc/lib/logger"
@@ -42,45 +41,7 @@ var (
 	JobRunner *jobrunner.JobRunner
 )
 
-func expandTilde(path string) (string, error) {
-	if len(path) == 0 || path[0] != '~' {
-		return path, nil
-	}
-
-	usr, err := user.Current()
-	if err != nil {
-		return "", fmt.Errorf("expandTilde user.Current: %v", err)
-	}
-	return filepath.Join(usr.HomeDir, path[1:]), nil
-}
-
-func ShowClusters() {
-	fmt.Printf("%-16s %-30s %-5s\n", "Name", "Description", "Hosts")
-	for _, entry := range Config.GetAllClusters() {
-		fmt.Printf("%-16s %-30s %-5d\n", entry.Name, entry.Description, len(entry.Hosts))
-	}
-}
-
-func ShowNodes(name string) {
-	cluster, err := Config.GetCluster(name)
-	if err != nil {
-		Logger.Fatalf("ShowNodes: %v", err)
-	}
-
-	fmt.Printf("Nodes for %s cluster:\n", name)
-	for _, node := range cluster.Hosts {
-		fmt.Printf("%s\n", node)
-	}
-}
-
-func ShowCommands() {
-	fmt.Printf("%-16s %-30s\n", "Name", "Description")
-	for _, entry := range Config.GetAllCommands() {
-		fmt.Printf("%-16s %-30s\n", entry.Name, entry.Description)
-	}
-}
-
-func init() {
+func ConfigureApp() {
 	var cfgFile string
 
 	flag.Parse()
@@ -93,7 +54,7 @@ func init() {
 		cfgFile = CFG_USER
 	}
 
-	cfgFile, err := expandTilde(cfgFile)
+	cfgFile, err := cliutils.ExpandTilde(cfgFile)
 	if err != nil {
 		Logger.Fatalf("init: %v", err)
 	}
@@ -103,42 +64,46 @@ func init() {
 		Logger.Fatalf("init: %v", err)
 	}
 
+	cliutils.Setup(Logger)
+
 	JobRunner = jobrunner.NewJobRunner(Logger, Config)
 }
 
-func main() {
+func RunApplication() int {
 	didShowCommand := false
 
 	if *showClusters {
-		ShowClusters()
+		cliutils.ShowClusters(Config)
 		didShowCommand = true
 	}
 
 	if *showNodes != "" {
-		ShowNodes(*showNodes)
+		cliutils.ShowNodes(Config, *showNodes)
 		didShowCommand = true
 	}
 
 	if *showCommands {
-		ShowCommands()
+		cliutils.ShowCommands(Config)
 		didShowCommand = true
 	}
 
 	if didShowCommand {
-		os.Exit(0)
+		return 0
 	}
 
 	if *useCluster == "" {
 		fmt.Printf("ERROR: Need a cluster to connect to\n")
-		os.Exit(0)
+		return 1
 	}
 
 	if !Config.HasCluster(*useCluster) {
 		fmt.Printf("ERROR: No such cluster\n")
+		return 1
 	}
 
 	if len(flag.Args()) == 0 {
 		fmt.Printf("ERROR: Need a command to run\n")
+		return 1
 	}
 
 	for _, command := range flag.Args() {
@@ -167,7 +132,7 @@ func main() {
 			cluster, err := Config.GetCluster(*useCluster)
 			if err != nil {
 				fmt.Printf("ERROR: %v", err)
-				os.Exit(1)
+				return 1
 			}
 
 			maxWorkers := *numWorkers
@@ -184,4 +149,14 @@ func main() {
 			JobRunner.Start(*outputModifier)
 		}
 	}
+
+	return 0
+}
+
+func init() {
+	ConfigureApp()
+}
+
+func main() {
+	os.Exit(RunApplication())
 }

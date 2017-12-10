@@ -18,13 +18,6 @@ commands:
   - name: uname
     description: "Run uname -a"
     command: "uname -a"
-  - name: temp_sshd
-    description: "Spawns sshd on a high port number"
-    script: |
-        #!/bin/sh
-        TMPFILE="$(mktemp)"
-        sed -e 's,Port 22,Port 2222' /etc/ssh/sshd_config > ${TMPFILE}
-        /usr/sbin/sshd -f ${TMPFILE}
   - name: df
     description: "Run df -h"
     command: "df -h"`

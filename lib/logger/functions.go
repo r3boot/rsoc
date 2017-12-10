@@ -18,11 +18,16 @@ func (l *Logger) message(logType, format string, values ...interface{}) {
 		logFormat = fmt.Sprintf("%s: %s", logType, format)
 	}
 
+	outputFd := os.Stdout
 	if logType == LOG_FATAL || logType == LOG_WARNING {
-		fmt.Fprintf(os.Stderr, logFormat, values...)
-	} else {
-		fmt.Printf(logFormat, values...)
+		outputFd = os.Stderr
 	}
+
+	if l.TestFd != nil {
+		outputFd = l.TestFd
+	}
+
+	fmt.Fprintf(outputFd, logFormat, values...)
 }
 
 func (l *Logger) Infof(format string, values ...interface{}) {
@@ -42,5 +47,8 @@ func (l *Logger) Warningf(format string, values ...interface{}) {
 
 func (l *Logger) Fatalf(format string, values ...interface{}) {
 	l.message(LOG_FATAL, format, values...)
+	if l.TestFd != nil {
+		return
+	}
 	os.Exit(1)
 }

@@ -1,19 +1,23 @@
 TARGET = rsoc
 
 BUILD_DIR = ./build
-BUILD_BRANCH = build
+TEST_DIR = ./test_results
+CI_DIR = ./ci
 
-all: prepare dependencies ${BUILD_DIR}/${TARGET}
+all: ${BUILD_DIR} ${BUILD_DIR}/${TARGET}
 
-prepare:
+${BUILD_DIR}:
 	mkdir -p "${BUILD_DIR}"
-
-dependencies:
-	go get -v ./...
 
 ${BUILD_DIR}/${TARGET}:
 	go build -v -o ${BUILD_DIR}/${TARGET} \
 		cmd/${TARGET}/${TARGET}.go
+
+${TEST_DIR}:
+	mkdir -p "${TEST_DIR}"
+
+unittests: ${TEST_DIR}
+	${CI_DIR}/run_tests.sh
 
 clean:
 	[[ -d "${BUILD_DIR}" ]] && rm -rf "${BUILD_DIR}" || true

@@ -8,6 +8,8 @@ import (
 
 	"encoding/json"
 
+	"os"
+
 	"github.com/r3boot/rsoc/lib/config"
 	"github.com/r3boot/rsoc/lib/transport/ssh"
 )
@@ -17,22 +19,40 @@ var lastJob = 0
 func (r *JobRunner) Worker(id int) {
 	log.Debugf("JobRunner.Worker: spawned with id %d", id)
 	for job := range r.JobQueue {
+		result := Result{Node: job.Node}
+
+		if job.Node == "test" {
+			log.Debugf("job.Command: %s", job.Command)
+			switch job.Command {
+			case TEST_STDERR:
+				result.Stderr = TEST_STDERR_MSG
+			case TEST_ERR:
+				result.err = fmt.Errorf(TEST_ERR_MSG)
+			default:
+				result.Stdout = TEST_STDOUT_MSG
+			}
+			r.ResultQueue <- result
+			continue
+		}
+
 		cmd := ""
 		cmd = fmt.Sprintf("%s", job.Command)
 		params := []string{"-n", job.Node, cmd}
 		log.Debugf("Worker(%d): running ssh %s", id, strings.Join(params, " "))
 		stdout, stderr, err := ssh.Run(params)
 		if err != nil {
-			log.Warningf("JobRunner.Worker(%d): failed to run ssh: %v", id, err)
+			errMsg := fmt.Errorf("failed to run ssh")
+			log.Warningf("Worker(%d): %v: %v", id, errMsg, err)
+			result.err = errMsg
+			log.Debugf("Worker(%d): submitted err result: %v", id, result.err)
+			r.ResultQueue <- result
 			continue
 		}
 
-		result := Result{
-			Node:   job.Node,
-			Stdout: stdout,
-			Stderr: stderr,
-			err:    err,
-		}
+		result.Stdout = stdout
+		result.Stderr = stderr
+		result.err = err
+
 		r.ResultQueue <- result
 	}
 
@@ -40,6 +60,7 @@ func (r *JobRunner) Worker(id int) {
 		Node: KILL_PILL,
 	}
 	r.ResultQueue <- result
+	log.Debugf("Worker(%d): submitted kill result: %v", id, result)
 }
 
 func (r *JobRunner) StartWorkers(numWorkers int) {
@@ -50,16 +71,11 @@ func (r *JobRunner) StartWorkers(numWorkers int) {
 	r.numWorkers = numWorkers
 }
 
+func (r *JobRunner) GetNumWorkers() int {
+	return r.numWorkers
+}
+
 func (r *JobRunner) Submit(job Job) error {
-	if job.Cluster == KILL_PILL {
-		for len(r.JobQueue) > 0 {
-			time.Sleep(1 * time.Second)
-		}
-		close(r.JobQueue)
-
-		return nil
-	}
-
 	clusterData := config.ClusterConfig{}
 
 	for _, cluster := range r.config.Clusters {
@@ -67,6 +83,26 @@ func (r *JobRunner) Submit(job Job) error {
 			clusterData = cluster
 			break
 		}
+	}
+
+	if job.Cluster == KILL_PILL {
+		for len(r.JobQueue) > 0 {
+			time.Sleep(1 * time.Second)
+		}
+		close(r.JobQueue)
+
+		return nil
+	} else if job.Cluster == TEST_CLUSTER {
+		for range clusterData.Hosts {
+			nodeJob := NodeJob{
+				Node:    "test",
+				Command: job.Command,
+			}
+			r.JobQueue <- nodeJob
+			log.Debugf("JobRunner.Submit: Succesfully submitted job with id %d", lastJob)
+			lastJob += 1
+		}
+		return nil
 	}
 
 	if clusterData.Name == "" {
@@ -97,7 +133,13 @@ func (r *JobRunner) Start(outputModifier string) {
 	log.Debugf("JobRunner.Start: waiting for responses")
 	allResponses := []Result{}
 
+	output := os.Stdout
+	if r.TestFd != nil {
+		output = r.TestFd
+	}
+
 	for response := range r.ResultQueue {
+		log.Debugf("JobRunner.Start: Got response: %v", response)
 		if response.Node == KILL_PILL {
 			numKillMessages += 1
 			if numKillMessages == r.numWorkers {
@@ -117,18 +159,26 @@ func (r *JobRunner) Start(outputModifier string) {
 			{
 				if len(response.Stdout) > 0 {
 					stdout := strings.Split(response.Stdout, "\n")
-					stdout = stdout[:len(stdout)-1]
+					if len(stdout) > 1 {
+						stdout = stdout[:len(stdout)-1]
+					}
 					for _, line := range stdout {
-						fmt.Printf("%s stdout: %s\n", response.Node, line)
+						fmt.Fprintf(output, "%s stdout: %s\n", response.Node, line)
 					}
 				}
 
 				if len(response.Stderr) > 0 {
 					stderr := strings.Split(response.Stderr, "\n")
-					stderr = stderr[:len(stderr)-1]
-					for _, line := range stderr {
-						fmt.Printf("%s stderr: %s\n", response.Node, line)
+					if len(stderr) > 1 {
+						stderr = stderr[:len(stderr)-1]
 					}
+					for _, line := range stderr {
+						fmt.Fprintf(output, "%s stderr: %s\n", response.Node, line)
+					}
+				}
+
+				if response.err != nil {
+					fmt.Fprintf(output, "%s err: %v\n", response.Node, response.err)
 				}
 			}
 		}
@@ -143,7 +193,7 @@ func (r *JobRunner) Start(outputModifier string) {
 				return
 			}
 
-			fmt.Printf("%s\n", string(data))
+			fmt.Fprintf(output, "%s\n", string(data))
 		}
 	}
 }
