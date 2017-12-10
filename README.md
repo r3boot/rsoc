@@ -8,7 +8,54 @@ on a cluster. It does not accept any input.
 * Job scheduler with a configurable amount of workers
 * Output in greppable or JSON format
 
+# Configuration
+Configuration is done using a configuration located at
+~/.config/rsoc/config.yaml if rsoc is running as a user, or
+/etc/rsoc.yaml if rsoc is running as root. An example can be found
+below:
+~~~~
+---
+clusters:
+  - name: webservers
+    description: "Frontend facing webservers"
+    hosts:
+      - web01
+      - web02
+      - web03
+  - name: databases
+    description: "Dackend database servers"
+    hosts:
+      - db01
+      - db02
+
+commands:
+  - name: uname
+    description: "Run uname -a"
+    command: "uname -a"
+  - name: df
+    description: "Run df -h"
+    command: "df -h"`
+~~~~
+
 # Usage
+### Available options
+~~~~
+alita [rsoc] >> ./build/rsoc -h
+Usage of ./build/rsoc:
+  -C    List available clusters
+  -L    List available commands
+  -N string
+        List nodes part of cluster
+  -T    Show timestamps in output
+  -c string
+        Cluster to connect to
+  -d    Enable debugging output
+  -o string
+        Output modifier (default "grep")
+  -w int
+        Number of jobs to run in parallel (default 10)
+~~~~
+
 ### Show available clusters
 ~~~~
 alita [rsoc] >> ./build/rsoc -C
