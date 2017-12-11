@@ -86,7 +86,7 @@ uptime           Show the uptime of a system
 ~~~~
 [alita [rsoc] >> ./build/rsoc -c webservers uname
 web01 stdout: Linux web01.example.com 4.13.12-1-ARCH #1 SMP PREEMPT Wed Nov 8 11:54:06 CET 2017 x86_64 GNU/Linux
-web02 stdout: Linux web03.example.com 4.13.12-1-ARCH #1 SMP PREEMPT Wed Nov 8 11:54:06 CET 2017 x86_64 GNU/Linux
+web02 stdout: Linux web02.example.com 4.13.12-1-ARCH #1 SMP PREEMPT Wed Nov 8 11:54:06 CET 2017 x86_64 GNU/Linux
 web03 stdout: Linux web03.example.com 4.13.12-1-ARCH #1 SMP PREEMPT Wed Nov 8 11:54:06 CET 2017 x86_64 GNU/Linux
 ~~~~
 
