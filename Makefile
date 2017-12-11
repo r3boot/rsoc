@@ -32,6 +32,7 @@ codecov:
 	find ${COVERAGE_DIR} -name *.out -exec cat {} \; > coverage.txt
 
 install:
+	strip -v ${PREFIX}/bin/${TARGET}
 	install -o root -g root -m 0755 ${BUILD_DIR}/${TARGET} ${PREFIX}/bin/${TARGET}
 
 clean:
