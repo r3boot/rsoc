@@ -11,7 +11,7 @@ const (
 )
 
 func TestRun(t *testing.T) {
-	if os.Getenv("TRAVIS_BUILD_DIR") != "" {
+	if os.Getenv("TRAVIS") == "" {
 		args := []string{"localhost", "uname"}
 		stdout, stderr, err := Run(args)
 		if len(stdout) > 0 {
