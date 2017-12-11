@@ -5,10 +5,14 @@ BUILD_DIR = ./build
 CI_DIR = ./ci
 COVERAGE_DIR = ${CI_DIR}/coverage
 
-all: ${BUILD_DIR} ${BUILD_DIR}/${TARGET}
+all: ${BUILD_DIR} dependencies ${BUILD_DIR}/${TARGET}
+tests: ${COVERAGE_DIR} test coverage
 
 ${BUILD_DIR}:
 	mkdir -p "${BUILD_DIR}"
+
+dependencies:
+	go get -v ./...
 
 ${BUILD_DIR}/${TARGET}:
 	go build -v -o ${BUILD_DIR}/${TARGET} \
