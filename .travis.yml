@@ -8,4 +8,11 @@ go:
   - 1.9.x
   - master
 
-script: make clean all tests
+before_install:
+  - make clean
+  - make dependencies
+
+script: make all tests codecov
+
+after_success:
+  bash <(curl -s https://codecov.io/bash) -t f11efaf2-1d00-4b28-bc03-6c266581ce66

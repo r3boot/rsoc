@@ -27,6 +27,9 @@ test:
 coverage: ${COVERAGE_DIR}
 	${CI_DIR}/run_tests.sh
 
+codecov:
+	find ${COVERAGE_DIR} -name *.out -exec cat {} \; > coverage.txt
+
 clean:
 	[[ -d "${BUILD_DIR}" ]] && rm -rf "${BUILD_DIR}" || true
 	[[ -d "${COVERAGE_DIR}" ]] && rm -rf "${COVERAGE_DIR}" || true
