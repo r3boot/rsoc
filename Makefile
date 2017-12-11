@@ -1,6 +1,7 @@
 TARGET = rsoc
 
 BUILD_DIR = ./build
+PREFIX = /usr/local
 
 CI_DIR = ./ci
 COVERAGE_DIR = ${CI_DIR}/coverage
@@ -29,6 +30,9 @@ coverage: ${COVERAGE_DIR}
 
 codecov:
 	find ${COVERAGE_DIR} -name *.out -exec cat {} \; > coverage.txt
+
+install:
+	install -o root -g root -m 0755 ${BUILD_DIR}/${TARGET} ${PREFIX}/bin/${TARGET}
 
 clean:
 	[[ -d "${BUILD_DIR}" ]] && rm -rf "${BUILD_DIR}" || true
