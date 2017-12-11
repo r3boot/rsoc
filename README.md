@@ -1,4 +1,4 @@
-# Run Stuff On Clusters [![Build Status](https://travis-ci.org/r3boot/rsoc.svg?branch=master)](https://travis-ci.org/r3boot/rsoc)
+# Run Stuff On Clusters [![Build Status](https://travis-ci.org/r3boot/rsoc.svg?branch=master)](https://travis-ci.org/r3boot/rsoc) [![codecov](https://codecov.io/gh/r3boot/rsoc/branch/master/graph/badge.svg)](https://codecov.io/gh/r3boot/rsoc)
 rsoc is a small utility, designed to run one-off commands on sets of
 machines, grouped in 'clusters'. It accepts a command, and runs this
 on a cluster. It does not accept any input.
