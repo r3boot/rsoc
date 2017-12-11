@@ -164,7 +164,7 @@ func TestJobRunner_Submit(t *testing.T) {
 	}
 	err = jobRunner.Submit(testSshParametersJob)
 	if err != nil {
-		t.Error("jobRunner.Submit err != nil: %v", err)
+		t.Errorf("jobRunner.Submit err != nil: %s", err)
 	}
 
 	for i := 0; i < wantedWorkers; i++ {
